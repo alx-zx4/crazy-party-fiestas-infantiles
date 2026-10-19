@@ -2968,6 +2968,38 @@ window.addEventListener('scroll', function(){
   });
 })();
 
+/* ── HERO AUTO-FIT (garantiza que el hero quepa en pantalla sin scroll) ──
+   El tamaño del título ya se encoge solo con vw+svh en el CSS, pero un
+   nombre de salón muy largo puede seguir sin caber en pantallas bajas
+   (celular en horizontal, laptop de poca altura). Esto mide si el
+   contenido real del hero se pasa del alto del propio #hero y, si es así,
+   reduce el font-size del título en pasos chicos hasta que quepa, con un
+   piso mínimo legible. Corre al cargar, al redimensionar y cuando
+   terminan de cargar las fuentes (si no se espera a document.fonts.ready,
+   el primer cálculo mide con la fuente de reemplazo del sistema y el
+   ajuste sale mal calculado). No toca nada si el contenido ya cabe. */
+(function(){
+  var hero = document.getElementById('hero');
+  var inner = hero && hero.querySelector('.hero-inner');
+  var title = hero && hero.querySelector('.hero-title');
+  if(!hero || !inner || !title) return;
+  var MIN = 28;
+  function fit(){
+    title.style.fontSize = '';
+    var guard = 0;
+    while(inner.scrollHeight > hero.clientHeight && guard < 40){
+      var size = parseFloat(getComputedStyle(title).fontSize);
+      if(size <= MIN) break;
+      title.style.fontSize = (size - 2) + 'px';
+      guard++;
+    }
+  }
+  function run(){ requestAnimationFrame(fit); }
+  if(document.fonts && document.fonts.ready){ document.fonts.ready.then(run); } else { run(); }
+  window.addEventListener('load', run);
+  window.addEventListener('resize', run);
+})();
+
 /* ── TAB SWITCHING ──
    Si agregas o quitas espacios, modifica solo los botones y paneles en el HTML.
    Esta función funciona de forma genérica. */
